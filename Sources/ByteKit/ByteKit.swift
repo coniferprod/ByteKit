@@ -4,3 +4,8 @@ public struct ByteKit {
     public init() {
     }
 }
+
+public enum ParseError: Error {
+    case invalidFormat
+    case badLength
+}

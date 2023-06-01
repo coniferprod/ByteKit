@@ -42,4 +42,22 @@ final class ByteTests: XCTestCase {
         b.replaceBits(2...5, with: 0b1010)
         XCTAssertEqual(b, 0b0110_1010)
     }
+    
+    func test_initFromBits() {
+        let bits: BitArray = [.one, .one, .zero, .zero, .one]  // 0b0001_0011
+        let b = Byte(bits: bits)
+        XCTAssertEqual(b, 0b0001_0011)
+    }
+    
+    func test_toBinaryString() {
+        let b = Byte(0b0001_0011)
+        let s = b.toBinaryString(padded: true)
+        XCTAssertEqual(s, "00010011")
+    }
+    
+    func test_toHexString() {
+        let b = Byte(0x2F)
+        let s = b.toHexString()
+        XCTAssertEqual(s, "2f")
+    }
 }

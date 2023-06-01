@@ -60,3 +60,92 @@ extension Data {
         return byteArray
     }
 }
+
+extension String {
+    public func split(by length: Int) -> [String] {
+        guard length > 0 else {
+            return []
+        }
+        
+        var start: Index!
+        var end = self.startIndex
+        return (0...self.count / length).map { _ in
+            start = end
+            end = self.index(start, offsetBy: length, limitedBy: self.endIndex) ?? self.endIndex
+            return String(self[start..<end])
+        }
+    }
+    
+    public var containsWhitespace: Bool {
+        return self.rangeOfCharacter(from: .whitespacesAndNewlines) != nil
+    }
+}
+
+extension ByteArray {
+    /// Parse a hex string into a byte array. After stripping whitespace, the string must be empty
+    /// or have an even number of hex digits. These are converted into bytes and appended to the
+    /// resulting byte array.
+    public static func parse(from: String) -> Result<ByteArray, ParseError> {
+        // If the string is initially empty, just return an empty array:
+        guard from.count != 0 else {
+            return .success(ByteArray())
+        }
+
+        var hexStrings = [String]()
+        if from.containsWhitespace {
+            hexStrings = from.components(separatedBy: .whitespaces)
+                .filter { $0.count != 0 }
+        }
+        else {
+            hexStrings = from.split(by: 2).filter { $0.count != 0 }
+        }
+        
+        var result = ByteArray()
+        
+        for hs in hexStrings {
+            //print("'\(hs)'")
+            if hs.count != 2 {
+                return .failure(.badLength)
+            }
+                        
+            if let b = Byte(hs, radix: 16) {
+                result.append(b)
+            }
+            else {
+                return .failure(.invalidFormat)
+            }
+        }
+        
+        return .success(result)
+    }
+}
+
+// MARK: - ByteArray utilities
+
+extension ByteArray {
+    /// Combines this byte array with `other`, alternating the elements from both,
+    /// starting with this one. Note that if this array and `other` have different lengths,
+    /// the result will be the same length as the shorter one (because of `zip`).
+    public func interleave(with other: ByteArray) -> ByteArray {
+        return zip(self, other).flatMap({ [$0, $1] })
+    }
+    
+    /// Deinterleaves the contents of this byte array into two separate arrays.
+    /// If the array has an odd number of elements, the second array will be
+    /// shorter than the first.
+    public func deinterleave() -> (ByteArray, ByteArray) {
+        var first = ByteArray()
+        var second = ByteArray()
+        
+        for (index, element) in self.enumerated() {
+            if index % 2 == 0 {
+                first.append(element)
+            }
+            else {
+                second.append(element)
+            }
+        }
+        
+        return (first, second)
+    }
+}

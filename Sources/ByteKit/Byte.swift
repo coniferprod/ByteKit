@@ -46,6 +46,39 @@ extension Byte {
         allBits.replaceSubrange(range, with: valueBits)  // replace the bit field
         self = allBits.toByte()
     }
+    
+    /// Returns the value of the bit field of `length` bits from the `start` position.
+    /// If the bit field would extend beyond eight bits, returns only the rest of the bits up to eight.
+    /// For example, `extractBits(start: 3, length: 2)` would return the value of bits 3 and 4.
+    public func extractBits(start: Int, length: Int) -> Byte {
+        assert((0...7).contains(start), "Bit field start must be between 0 and 7")
+        assert((0...7).contains(length), "Bit field length must be between 0 and 7")
+        
+        let end = Swift.min(start + length - 1, 7)
+        
+        // Convert the byte into a bit string of exactly 8 characters (pad to zero from left as necessary)
+        let allBits = self.toBitArray()
+        let fieldBits = allBits[start...end]
+
+        let byte = Byte(bits: BitArray(fieldBits))
+        return byte
+    }
+    
+    /// Gets a binary representation of this byte.
+    /// If `padded` is `true`, the string is padded from the left with zeros up to eight digits.
+    public func toBinaryString(padded: Bool = true) -> String {
+        let result = String(self, radix: 2)
+        if padded {
+            let pad = String(repeating: Character("0"), count: (8 - result.count))
+            return pad + result
+        }
+        return result
+    }
+    
+    public func toHexString(digits: Int = 2, uppercase: Bool = false) -> String {
+        assert(digits >= 2, "Must use two or more hex digits")
+        return String(format: "%0\(digits)x", self)
+    }
 }
 
 // MARK: - Nybble-related extensions to Byte
@@ -89,19 +122,38 @@ extension Bit: CustomStringConvertible {
 extension BitArray {
     /// Converts the bits in this array to a byte.
     public func toByte() -> Byte {
-        var value: Byte = 0x00
+        // TODO: Ensure that there are exactly eight bytes in the array before converting.
+        
+        var bits: BitArray
+        if self.count > 8 {
+            bits = BitArray(self.prefix(8))
+        }
+        else if self.count < 8 {
+            bits = self
+            while bits.count < 8 {
+                bits.append(.zero)
+            }
+        }
+        else {
+            bits = self
+        }
+        
+        var value: Byte = 0x00  // start with all bits zero
+        
         // Take only the first eight bits, in case there are more.
-        for (position, bit) in self.prefix(8).enumerated() {
+        for (position, bit) in bits.enumerated() {
             if bit == .one {
                 value.setBit(position)
             }
         }
+        
         return value
     }
 }
 
 extension Byte {
-    /// Converts this byte into a `BitArray`.
+    /// Converts this byte into a `BitArray`, with exactly eight Bit objects,
+    /// bit #0 first and bit #7 last.
     public func toBitArray() -> BitArray {
         var allBits = BitArray(repeating: .zero, count: 8)
         for i in 0..<8 {
@@ -110,6 +162,12 @@ extension Byte {
             }
         }
         return allBits
+    }
+    
+    /// Initializes a byte from an array of bits, with bit #0 first.
+    /// If the array has less than eight bits, pad it with zero bits from the left.
+    public init(bits: BitArray) {
+        self = bits.toByte()
     }
 }
 

@@ -31,4 +31,54 @@ final class ByteArrayTests: XCTestCase {
         let ba = ByteArray()
         XCTAssertEqual(ba.denybblified()!.count, ba.count)
     }
+    
+    func test_parseFromHexString_empty() {
+        switch ByteArray.parse(from: "") {
+        case .success(let ba):
+            XCTAssertEqual(ba, ByteArray())
+        case .failure(let error):
+            XCTFail("\(error)")
+        }
+    }
+    
+    func test_parseFromHexString_withWhitespace() {
+        let hexString = "  12 34 56   78 9A AB BC  CD DE EF   F0 "
+        switch ByteArray.parse(from: hexString) {
+        case .success(let ba):
+            XCTAssertEqual(ba, [0x12, 0x34, 0x56, 0x78, 0x9a, 0xab, 0xbc, 0xcd, 0xde, 0xef, 0xf0])
+        case .failure(let error):
+            XCTFail("\(error)")
+        }
+    }
+    
+    func test_parseFromHexString_noWhitespace() {
+        let hexString = "123456789AABBCCDDEEFF0"
+        switch ByteArray.parse(from: hexString) {
+        case .success(let ba):
+            XCTAssertEqual(ba, [0x12, 0x34, 0x56, 0x78, 0x9a, 0xab, 0xbc, 0xcd, 0xde, 0xef, 0xf0])
+        case .failure(let error):
+            XCTFail("\(error)")
+        }
+    }
+    
+    func test_interleave() {
+        let first: ByteArray = [0x01, 0x02, 0x03]
+        let second: ByteArray = [0x04, 0x05, 0x06]
+        let result = first.interleave(with: second)
+        XCTAssertEqual(result, [0x01, 0x04, 0x02, 0x05, 0x03, 0x06])
+    }
+    
+    func test_deinterleave() {
+        let ba: ByteArray = [0x01, 0x04, 0x02, 0x05, 0x03, 0x06]
+        let (first, second) = ba.deinterleave()
+        XCTAssertEqual(first, [0x01, 0x02, 0x03])
+        XCTAssertEqual(second, [0x04, 0x05, 0x06])
+    }
+    
+    func test_deinterleave_odd() {
+        let ba: ByteArray = [0x01, 0x04, 0x02, 0x05, 0x03]
+        let (first, second) = ba.deinterleave()
+        XCTAssertEqual(first, [0x01, 0x02, 0x03])
+        XCTAssertEqual(second, [0x04, 0x05])
+    }
 }
