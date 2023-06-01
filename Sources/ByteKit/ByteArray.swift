@@ -51,3 +51,12 @@ extension ByteArray {
         return result
     }
 }
+
+extension Data {
+    /// Returns the contents of this `Data` object as a byte array.
+    public var bytes: ByteArray {
+        var byteArray = ByteArray(repeating: 0, count: self.count)
+        self.copyBytes(to: &byteArray, count: self.count)
+        return byteArray
+    }
+}
