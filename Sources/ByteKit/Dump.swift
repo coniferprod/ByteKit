@@ -1,8 +1,15 @@
 import Foundation
 
 public struct HexDumpConfiguration {
-    public var bytesPerLine: Int { 16 }
-    public var uppercased: Bool { true }
+    public init(bytesPerLine: Int = 16, uppercased: Bool = true,
+                includeOptions: HexDumpConfiguration.IncludeOptions) {
+        self.bytesPerLine = bytesPerLine
+        self.uppercased = uppercased
+        self.includeOptions = includeOptions
+    }
+    
+    public var bytesPerLine: Int = 16
+    public var uppercased: Bool = true
     
     /// Flags to control the inclusion of hex dump features.
     public struct IncludeOptions: OptionSet {
@@ -22,7 +29,8 @@ public struct HexDumpConfiguration {
         }
     }
     
-    /// What features to include in the dump. See `IncludeOptions`.
+    /// What features to include in the dump. 
+    /// See `IncludeOptions`.
     public var includeOptions: IncludeOptions
     
     /// Standard hex dump configuration.
@@ -34,20 +42,29 @@ public struct HexDumpConfiguration {
 
 /// Source dump configuration parameters.
 public struct SourceDumpConfiguration {
+    public init(bytesPerLine: Int = 16, uppercased: Bool = false, indent: Int = 4,
+                variableName: String = "data", typeName: String = "[UInt8]") {
+        self.bytesPerLine = bytesPerLine
+        self.uppercased = uppercased
+        self.indent = indent
+        self.variableName = variableName
+        self.typeName = typeName
+    }
+    
     /// How many bytes per line.
-    public var bytesPerLine: Int { 16 }
+    public var bytesPerLine: Int = 16
     
     /// Are hex digits uppercased or not.
-    public var uppercased: Bool { false }
+    public var uppercased: Bool = false
     
     /// How many spaces to indent each data row.
-    public var indent: Int { 4 }
+    public var indent: Int = 4
 
     /// Name of the variable in the generated source code.
-    public var variableName: String { "data" }
+    public var variableName: String = "data"
     
     /// Type of the variable in the generated source code.
-    public var typeName: String { "[UInt8]"}
+    public var typeName: String = "[UInt8]"
     
     /// Standard source dump configuration.
     public static let standard = SourceDumpConfiguration()
