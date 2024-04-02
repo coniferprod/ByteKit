@@ -56,7 +56,8 @@ extension Byte {
         
         let end = Swift.min(start + length - 1, 7)
         
-        // Convert the byte into a bit string of exactly 8 characters (pad to zero from left as necessary)
+        // Convert the byte into a bit string of exactly 8 characters 
+        // (pad to zero from left as necessary)
         let allBits = self.toBitArray()
         let fieldBits = allBits[start...end]
 
@@ -65,7 +66,8 @@ extension Byte {
     }
     
     /// Gets a binary representation of this byte.
-    /// If `padded` is `true`, the string is padded from the left with zeros up to eight digits.
+    /// If `padded` is `true`, the string is padded from 
+    /// left with zeros, up to eight digits.
     public func toBinaryString(padded: Bool = true) -> String {
         let result = String(self, radix: 2)
         if padded {
@@ -75,6 +77,9 @@ extension Byte {
         return result
     }
     
+    /// Gets a hexadecimal representation of this byte.
+    /// Uses at least two hex digits, padded with zeros 
+    /// from left if more.
     public func toHexString(digits: Int = 2, uppercase: Bool = false) -> String {
         assert(digits >= 2, "Must use two or more hex digits")
         return String(format: "%0\(digits)x", self)
@@ -122,7 +127,8 @@ extension Bit: CustomStringConvertible {
 extension BitArray {
     /// Converts the bits in this array to a byte.
     public func toByte() -> Byte {
-        // TODO: Ensure that there are exactly eight bytes in the array before converting.
+        // Ensure that there are exactly eight bytes
+        // in the array before converting:
         
         var bits: BitArray
         if self.count > 8 {
@@ -152,7 +158,8 @@ extension BitArray {
 }
 
 extension Byte {
-    /// Converts this byte into a `BitArray`, with exactly eight Bit objects,
+    /// Converts this byte into a `BitArray`, 
+    /// with exactly eight Bit objects,
     /// bit #0 first and bit #7 last.
     public func toBitArray() -> BitArray {
         var allBits = BitArray(repeating: .zero, count: 8)
@@ -164,10 +171,8 @@ extension Byte {
         return allBits
     }
     
-    /// Initializes a byte from an array of bits, with bit #0 first.
-    /// If the array has less than eight bits, pad it with zero bits from the left.
+    /// Initializes a byte from an array of bits.
     public init(bits: BitArray) {
         self = bits.toByte()
     }
 }
-

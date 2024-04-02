@@ -3,7 +3,8 @@ import Foundation
 /// Convenience type alias for an array of bytes.
 public typealias ByteArray = [Byte]
 
-/// Order of nybbles in a nybblified byte: low nybble or high nybble first.
+/// Order of nybbles in a nybblified byte: 
+/// low nybble or high nybble first.
 public enum NybbleOrder {
     case lowFirst
     case highFirst
@@ -12,7 +13,8 @@ public enum NybbleOrder {
 // MARK: - Nybble-related extensions to `ByteArray`.
 
 extension ByteArray {
-    /// Returns a nybblified version of this byte array. The nybble order is determined by `order`.
+    /// Returns a nybblified version of this byte array. 
+    /// The nybble order is determined by `order`.
     public func nybblified(order: NybbleOrder = .highFirst) -> ByteArray {
         var result = ByteArray()
         self.forEach { b in
@@ -29,9 +31,12 @@ extension ByteArray {
         return result
     }
     
-    /// Returns a denybblified version of this byte array, or `nil` if the length of the array is odd.
+    /// Returns a denybblified version of this byte array, 
+    /// or `nil` if the length of the array is odd.
     public func denybblified(order: NybbleOrder = .highFirst) -> ByteArray? {
-        guard self.count % 2 == 0 else {
+        guard 
+            self.count % 2 == 0
+        else {
             return nil
         }
         
@@ -62,8 +67,11 @@ extension Data {
 }
 
 extension String {
+    /// Splits the string into parts of size `length`.
     public func split(by length: Int) -> [String] {
-        guard length > 0 else {
+        guard 
+            length > 0
+        else {
             return []
         }
         
@@ -75,19 +83,23 @@ extension String {
             return String(self[start..<end])
         }
     }
-    
+
+    /// Returns `true` if the string contains whitespace,
+    /// `false` otherwise.
     public var containsWhitespace: Bool {
         return self.rangeOfCharacter(from: .whitespacesAndNewlines) != nil
     }
 }
 
 extension ByteArray {
-    /// Parse a hex string into a byte array. After stripping whitespace, the string must be empty
-    /// or have an even number of hex digits. These are converted into bytes and appended to the
-    /// resulting byte array.
+    /// Parse a hex string into a byte array. After stripping whitespace, 
+    /// the string must be empty or have an even number of hex digits.
+    /// These are converted into bytes and appended to the resulting byte array.
     public static func parse(from: String) -> Result<ByteArray, ParseError> {
         // If the string is initially empty, just return an empty array:
-        guard from.count != 0 else {
+        guard 
+            from.count != 0
+        else {
             return .success(ByteArray())
         }
 
@@ -103,7 +115,6 @@ extension ByteArray {
         var result = ByteArray()
         
         for hs in hexStrings {
-            //print("'\(hs)'")
             if hs.count != 2 {
                 return .failure(.badLength)
             }
