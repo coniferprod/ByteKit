@@ -160,3 +160,104 @@ extension ByteArray {
         return (first, second)
     }
 }
+
+// MARK: - ByteArray unpacking
+
+/// Values used by the BytArray's `unpack` method when interpreting
+/// the content.
+public enum Value: Equatable {
+    case boolean(Bool)
+    case byte(Byte)
+    case character(Character)
+    case shortInteger(Int16)
+    case unsignedShortInteger(UInt16)
+    case integer(Int32)
+    case unsignedInteger(UInt32)
+    case longInteger(Int64)
+    case unsignedLongInteger(UInt64)
+}
+
+func doInt16(_ b1: Byte, _ b2: Byte) -> Int16 {
+    (Int16(b1) << 8) | Int16(b2)
+}
+
+func doUInt16(_ b1: Byte, _ b2: Byte) -> UInt16 {
+    (UInt16(b1) << 8) | UInt16(b2)
+}
+
+func doUInt32(_ b1: Byte, _ b2: Byte, _ b3: Byte, _ b4: Byte) -> UInt32 {
+    (UInt32(b1) << 24) | (UInt32(b2) << 16) | (UInt32(b3) << 8) | UInt32(b4)
+}
+
+func doInt32(_ b1: Byte, _ b2: Byte, _ b3: Byte, _ b4: Byte) -> Int32 {
+    (Int32(b1) << 24) | (Int32(b2) << 16) | (Int32(b3) << 8) | Int32(b4)
+}
+
+// TODO: doUInt64 and doInt64 functions
+
+extension ByteArray {
+    /// Unpacks the contents of this `ByteArray` into values according to the format.
+    /// Loosely emulates Python's `struct`module, but is less comprehensive.
+    public func unpack(format: String) -> Result<[Value], ParseError> {
+        guard
+            format.count != 0
+        else {
+            return .failure(.invalidFormat)
+        }
+        
+        var values = [Value]()
+        var offset = 0
+        var byte1: Byte
+        var byte2: Byte
+        var byte3: Byte
+        var byte4: Byte
+        
+        for character in format {
+            var value: Value
+            switch character {
+            case " ":
+                continue
+            case "?":
+                byte1 = self[offset]
+                value = .boolean(byte1 != 0 ? true : false)
+                offset += 1
+            case "b":
+                value = .byte(self[offset])
+                offset += 1
+            case "c":
+                value = .character(Character(Unicode.Scalar(self[offset])))
+                offset += 1
+            case "h":
+                byte1 = self[offset]
+                byte2 = self[offset + 1]
+                value = .shortInteger(doInt16(byte1, byte2))
+                offset += 2
+            case "H":
+                byte1 = self[offset]
+                byte2 = self[offset + 1]
+                value = .unsignedShortInteger(doUInt16(byte1, byte2))
+                offset += 2
+            case "I":
+                byte1 = self[offset]
+                byte2 = self[offset + 1]
+                byte3 = self[offset + 2]
+                byte4 = self[offset + 3]
+                value = .unsignedInteger(doUInt32(byte1, byte2, byte3, byte4))
+                offset += 4
+            case "i":
+                byte1 = self[offset]
+                byte2 = self[offset + 1]
+                byte3 = self[offset + 2]
+                byte4 = self[offset + 3]
+                value = .integer(doInt32(byte1, byte2, byte3, byte4))
+                offset += 4
+            default:
+                return .failure(.invalidFormat)
+            }
+            
+            values.append(value)
+        }
+        
+        return .success(values)
+    }
+}
