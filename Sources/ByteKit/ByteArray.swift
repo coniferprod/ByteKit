@@ -159,6 +159,11 @@ extension ByteArray {
         
         return (first, second)
     }
+    
+    /// Returns a new byte array with `length` bytes starting from `offset`.
+    public func slice(from offset: Int, length: Int) -> ByteArray {
+        return ByteArray(self[offset ..< offset + length])
+    }
 }
 
 // MARK: - ByteArray unpacking
