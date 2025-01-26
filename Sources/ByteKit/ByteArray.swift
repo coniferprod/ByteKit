@@ -168,7 +168,7 @@ extension ByteArray {
 
 // MARK: - ByteArray unpacking
 
-/// Values used by the BytArray's `unpack` method when interpreting
+/// Values used by the ByteArray's `unpack` method when interpreting
 /// the content.
 public enum Value: Equatable {
     case boolean(Bool)
